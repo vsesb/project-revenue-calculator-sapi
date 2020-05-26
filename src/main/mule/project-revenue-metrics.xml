@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="project-revenue-metricsFlow" doc:id="47a9c6f4-68f2-42dc-ac7a-f3013b03f8ad" >
+		<logger level="INFO" doc:name="revenue metrics" doc:id="34e9c465-dc56-4638-9869-f3e8a1cfbc55" message="revenue metrics"/>
+		<db:select doc:name="Select" doc:id="ae842fca-3d5a-43cb-8c4c-c863e81aa1f0" config-ref="Database_Config">
+			<db:sql >select * from project_revenue_view;</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="dd8bf1ce-5629-463b-9258-e8ab46499780" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((obj,key)->{
+ project:obj.project_name,
+ quarter:"Q1",
+ revenue:obj.Revenue,
+ cost:obj.QuarterCost,
+ profitMargin: obj.Profit_Margin
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="598dec82-1b47-4abf-a059-e41254d97a28" message="#[sizeOf(payload)]"/>
+	</flow>
+</mule>

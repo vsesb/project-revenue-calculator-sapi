@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="1d2e1834-16a9-4584-875d-166b2423b092" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="muletrainingdb" />
+	</db:config>
+	<flow name="project-efforts-costFlow" doc:id="0b2d0d35-a617-4ae7-abbb-4256b4689734" >
+		<logger level="INFO" doc:name="project efforts" doc:id="a71ade23-d74c-441f-a02b-91f8161d95fb" message="project efforts"/>
+		<db:select doc:id="de4ebca0-bf76-4685-bd81-fb22affcefce" config-ref="Database_Config">
+			<db:sql >select * from project_effort_l2_view;</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="122a7792-2f04-4482-969c-ce3be197385f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json	
+---
+payload map ((obj,key)->{
+ project:obj.project_name,
+ quarter:"Q1",
+ role:obj.role,
+ effort:obj.hours as String ++ " hrs",
+ cost: obj.QuarterCost
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8552fd09-a7e5-4e19-ae0c-1caf9b453d86" message="#[sizeOf(payload)]"/>
+	</flow>
+</mule>
